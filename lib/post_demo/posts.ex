@@ -9,6 +9,23 @@ defmodule PostDemo.Posts do
   alias PostDemo.Posts.Post
   alias PostDemo.Repo
 
+  @pubsub PostDemo.PubSub
+  @topic inspect(__MODULE__)
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(@pubsub, @topic)
+  end
+
+  def broadcast({:ok, %Comment{} = comment}, action) do
+    Phoenix.PubSub.broadcast(@pubsub, @topic, {action, comment})
+
+    {:ok, comment}
+  end
+
+  def broadcast({:error, _changeset} = error, _action) do
+    error
+  end
+
   @doc """
   Returns the list of posts.
 
@@ -148,6 +165,7 @@ defmodule PostDemo.Posts do
     %Comment{}
     |> Comment.changeset(attrs)
     |> Repo.insert()
+    |> broadcast(:comment_created)
   end
 
   @doc """

@@ -8,6 +8,10 @@ defmodule PostDemoWeb.PostLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Posts.subscribe()
+    end
+
     socket
     |> assign_post()
     |> assign_comments()
@@ -108,19 +112,24 @@ defmodule PostDemoWeb.PostLive do
     params = Map.put(params, "post_id", socket.assigns.post.id)
 
     case Posts.create_comment(params) do
-      {:ok, comment} ->
+      {:ok, _comment} ->
         socket
-        |> assign(:comments, [comment | socket.assigns.comments])
         |> assign_comment_form()
         |> put_flash(:info, gettext("Posted a comment!"))
         |> noreply()
 
-      {:error, changeset} ->
-        IO.inspect(changeset)
-
+      {:error, _changeset} ->
         socket
         |> put_flash(:error, gettext("Something went wrong..."))
         |> noreply()
     end
+  end
+
+  @impl true
+  def handle_info({:comment_created, comment}, socket) do
+    socket
+    # efficient, but might be brittle
+    |> update(:comments, fn comments -> [comment | comments] end)
+    |> noreply()
   end
 end
