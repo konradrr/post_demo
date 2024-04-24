@@ -16,8 +16,9 @@ defmodule PostDemoWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  alias Phoenix.LiveView.JS
   import PostDemoWeb.Gettext
+
+  alias Phoenix.LiveView.JS
 
   @doc """
   Renders a modal.
@@ -278,8 +279,7 @@ defmodule PostDemoWeb.CoreComponents do
     values: ~w(checkbox color date datetime-local email file month number password
                range search select tel text textarea time url week)
 
-  attr :field, Phoenix.HTML.FormField,
-    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :errors, :list, default: []
   attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
@@ -287,8 +287,7 @@ defmodule PostDemoWeb.CoreComponents do
   attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
 
-  attr :rest, :global,
-    include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
+  attr :rest, :global, include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
 
   slot :inner_block
@@ -605,8 +604,7 @@ defmodule PostDemoWeb.CoreComponents do
     JS.show(js,
       to: selector,
       transition:
-        {"transition-all transform ease-out duration-300",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
+        {"transition-all transform ease-out duration-300", "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
          "opacity-100 translate-y-0 sm:scale-100"}
     )
   end
@@ -616,8 +614,7 @@ defmodule PostDemoWeb.CoreComponents do
       to: selector,
       time: 200,
       transition:
-        {"transition-all transform ease-in duration-200",
-         "opacity-100 translate-y-0 sm:scale-100",
+        {"transition-all transform ease-in duration-200", "opacity-100 translate-y-0 sm:scale-100",
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
   end
@@ -672,5 +669,59 @@ defmodule PostDemoWeb.CoreComponents do
   """
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
+  end
+
+  slot :inner_block, required: true
+  attr :class, :any, default: ""
+  attr :rest, :global
+
+  def h1(assigns) do
+    ~H"""
+    <h1
+      class={[
+        "inline-block mb-2 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </h1>
+    """
+  end
+
+  slot :inner_block, required: true
+  attr :class, :any, default: ""
+  attr :rest, :global
+
+  def h2(assigns) do
+    ~H"""
+    <h2
+      class={[
+        "inline-block mb-2 text-2xl font-extrabold tracking-tight text-gray-800 dark:text-white",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </h2>
+    """
+  end
+
+  slot :inner_block, required: true
+  attr :class, :any, default: ""
+  attr :rest, :global
+
+  def p(assigns) do
+    ~H"""
+    <p
+      class={[
+        "text-lg text-gray-700 lg:mb-0 dark:text-gray-400 lg:max-w-2xl",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </p>
+    """
   end
 end
