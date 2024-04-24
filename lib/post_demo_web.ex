@@ -55,6 +55,7 @@ defmodule PostDemoWeb do
         layout: {PostDemoWeb.Layouts, :app}
 
       unquote(html_helpers())
+      unquote(live_view_helpers())
     end
   end
 
@@ -92,6 +93,13 @@ defmodule PostDemoWeb do
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())
+    end
+  end
+
+  defp live_view_helpers do
+    quote do
+      def ok(socket, opts \\ []), do: {:ok, socket, opts}
+      def noreply(socket, opts \\ []), do: {:noreply, socket, opts}
     end
   end
 

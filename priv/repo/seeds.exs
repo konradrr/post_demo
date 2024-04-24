@@ -9,3 +9,8 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+PostDemo.Repo.insert!(%PostDemo.Posts.Post{
+  title: Faker.Lorem.sentence(),
+  body: Faker.Lorem.paragraph()
+})

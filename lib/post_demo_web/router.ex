@@ -17,7 +17,7 @@ defmodule PostDemoWeb.Router do
   scope "/", PostDemoWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", PostLive
   end
 
   # Other scopes may use custom stacks.
