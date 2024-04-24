@@ -25,6 +25,11 @@ defmodule PostDemo.Posts.Comment do
     |> cast(attrs, @cast_attrs)
     |> validate_length(:author, max: 255)
     |> validate_length(:body, max: 750)
+    |> put_posted_at()
     |> validate_required(@required_attrs)
+  end
+
+  defp put_posted_at(changeset) do
+    put_change(changeset, :posted_at, DateTime.truncate(DateTime.utc_now(), :second))
   end
 end

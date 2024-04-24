@@ -202,15 +202,13 @@ defmodule PostDemo.Posts do
   """
 
   def get_comments_by_post(%Post{} = post) do
-    Comment
-    |> where(post_id: ^post.id)
-    |> Repo.all()
+    get_comments_by_post(post.id)
   end
 
-  #
   def get_comments_by_post(post_id) do
     Comment
     |> where(post_id: ^post_id)
+    |> order_by(desc: :posted_at)
     |> Repo.all()
   end
 end

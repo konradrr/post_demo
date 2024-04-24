@@ -24,9 +24,9 @@ defmodule PostDemoWeb do
       use Phoenix.Router, helpers: false
 
       # Import common connection and controller functions to use in pipelines
-      import Plug.Conn
       import Phoenix.Controller
       import Phoenix.LiveView.Router
+      import Plug.Conn
     end
   end
 
@@ -99,7 +99,7 @@ defmodule PostDemoWeb do
   defp live_view_helpers do
     quote do
       def ok(socket, opts \\ []), do: {:ok, socket, opts}
-      def noreply(socket, opts \\ []), do: {:noreply, socket, opts}
+      def noreply(socket), do: {:noreply, socket}
     end
   end
 

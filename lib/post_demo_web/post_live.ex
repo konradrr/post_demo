@@ -11,6 +11,7 @@ defmodule PostDemoWeb.PostLive do
     socket
     |> assign_post()
     |> assign_comments()
+    |> assign_comment_form()
     |> assign_title()
     |> ok()
   end
@@ -23,6 +24,10 @@ defmodule PostDemoWeb.PostLive do
     assign(socket, :comments, Posts.get_comments_by_post(post))
   end
 
+  def assign_comment_form(socket) do
+    assign(socket, :comment_form, to_form(Posts.change_comment(%Comment{})))
+  end
+
   defp assign_title(socket) do
     assign(socket, :page_title, socket.assigns.post.title)
   end
@@ -31,7 +36,7 @@ defmodule PostDemoWeb.PostLive do
   def render(assigns) do
     ~H"""
     <.post post={@post} />
-    <.comments comments={@comments} />
+    <.comments comments={@comments} comment_form={@comment_form} />
     """
   end
 
@@ -47,11 +52,29 @@ defmodule PostDemoWeb.PostLive do
   end
 
   attr :comments, :list, required: true
+  attr :comment_form, Phoenix.HTML.Form, required: true
 
   def comments(assigns) do
     ~H"""
     <section>
       <.h2>Comments</.h2>
+
+      <.simple_form
+        id="comment_form"
+        for={@comment_form}
+        phx-change="validate_comment"
+        phx-submit="post_comment"
+      >
+        <.input field={@comment_form[:author]} label={gettext("Author")} phx-debounce="200" />
+        <.input
+          field={@comment_form[:body]}
+          type="textarea"
+          label={gettext("Comment")}
+          phx-debounce="200"
+        />
+
+        <.button><%= gettext("Post Comment") %></.button>
+      </.simple_form>
 
       <.comment :for={comment <- @comments} comment={comment} />
     </section>
@@ -69,5 +92,35 @@ defmodule PostDemoWeb.PostLive do
       <.p class="text-gray-500 dark:text-gray-400"><%= @comment.body %></.p>
     </div>
     """
+  end
+
+  @impl true
+  def handle_event("validate_comment", %{"comment" => params}, socket) do
+    comment_form = %Comment{} |> Posts.change_comment(params) |> Map.put(:action, :validate) |> to_form()
+
+    socket
+    |> assign(:comment_form, comment_form)
+    |> noreply()
+  end
+
+  @impl true
+  def handle_event("post_comment", %{"comment" => params}, socket) do
+    params = Map.put(params, "post_id", socket.assigns.post.id)
+
+    case Posts.create_comment(params) do
+      {:ok, comment} ->
+        socket
+        |> assign(:comments, [comment | socket.assigns.comments])
+        |> assign_comment_form()
+        |> put_flash(:info, gettext("Posted a comment!"))
+        |> noreply()
+
+      {:error, changeset} ->
+        IO.inspect(changeset)
+
+        socket
+        |> put_flash(:error, gettext("Something went wrong..."))
+        |> noreply()
+    end
   end
 end

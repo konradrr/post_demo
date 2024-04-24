@@ -80,7 +80,6 @@ defmodule PostDemo.PostsTest do
 
       assert comment.author == "some author"
       assert comment.body == "some body"
-      assert comment.posted_at == ~U[2024-04-23 07:47:00Z]
     end
 
     test "create_comment/1 with invalid data returns error changeset" do
@@ -97,12 +96,11 @@ defmodule PostDemo.PostsTest do
 
     test "update_comment/2 with valid data updates the comment" do
       comment = comment_fixture()
-      update_attrs = %{author: "some updated author", body: "some updated body", posted_at: ~U[2024-04-24 07:47:00Z]}
+      update_attrs = %{author: "some updated author", body: "some updated body"}
 
       assert {:ok, %Comment{} = comment} = Posts.update_comment(comment, update_attrs)
       assert comment.author == "some updated author"
       assert comment.body == "some updated body"
-      assert comment.posted_at == ~U[2024-04-24 07:47:00Z]
     end
 
     test "update_comment/2 with invalid data returns error changeset" do

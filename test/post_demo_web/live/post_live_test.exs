@@ -13,7 +13,7 @@ defmodule PostDemoWeb.PostLiveTest do
   describe "Showing post" do
     setup [:create_post]
 
-    test "shows Post with Comments correctly", ctx do
+    test "showing Post with Comments correctly", ctx do
       %{conn: conn, post: post, comments: [comment]} = ctx
 
       {:ok, lv, _html} = live(conn, ~p"/")
@@ -23,6 +23,32 @@ defmodule PostDemoWeb.PostLiveTest do
 
       assert has_element?(lv, "div", comment.author)
       assert has_element?(lv, "div", comment.body)
+    end
+
+    test "posting a comment to the post", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/")
+
+      lv
+      |> form("#comment_form")
+      |> render_change(%{
+        "comment" => %{author: "", body: "abc"}
+      })
+
+      assert has_element?(lv, ~s|div[phx-feedback-for="comment[author]"] p|, "can't be blank")
+
+      lv
+      |> form("#comment_form")
+      |> render_change(%{
+        "comment" => %{author: "Johhny", body: "abc"}
+      })
+
+      refute has_element?(lv, ~s(div[phx-feedback-for="shipping_info[zip_code]"] p), "can't be blank")
+
+      html = lv |> form("#comment_form") |> render_submit()
+
+      assert html =~ "Posted a comment!"
+      assert has_element?(lv, "div", "Johhny")
+      assert has_element?(lv, "div", "abc")
     end
   end
 end
