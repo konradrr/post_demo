@@ -1,13 +1,13 @@
 defmodule PostDemo.PostsTest do
   use PostDemo.DataCase
 
+  import PostDemo.PostsFixtures
+
   alias PostDemo.Posts
+  alias PostDemo.Posts.Comment
+  alias PostDemo.Posts.Post
 
   describe "posts" do
-    alias PostDemo.Posts.Post
-
-    import PostDemo.PostsFixtures
-
     @invalid_attrs %{title: nil, body: nil}
 
     test "list_posts/0 returns all posts" do
@@ -56,6 +56,94 @@ defmodule PostDemo.PostsTest do
     test "change_post/1 returns a post changeset" do
       post = post_fixture()
       assert %Ecto.Changeset{} = Posts.change_post(post)
+    end
+  end
+
+  describe "comments" do
+    @invalid_attrs %{author: nil, body: nil, posted_at: nil}
+
+    test "list_comments/0 returns all comments" do
+      comment = comment_fixture()
+      assert Posts.list_comments() == [comment]
+    end
+
+    test "get_comment!/1 returns the comment with given id" do
+      comment = comment_fixture()
+      assert Posts.get_comment!(comment.id) == comment
+    end
+
+    test "create_comment/1 with valid data creates a comment" do
+      post = post_fixture()
+      valid_attrs = %{post_id: post.id, author: "some author", body: "some body", posted_at: ~U[2024-04-23 07:47:00Z]}
+
+      assert {:ok, %Comment{} = comment} = Posts.create_comment(valid_attrs)
+
+      assert comment.author == "some author"
+      assert comment.body == "some body"
+      assert comment.posted_at == ~U[2024-04-23 07:47:00Z]
+    end
+
+    test "create_comment/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Posts.create_comment(@invalid_attrs)
+    end
+
+    test "create_comment/1 with too long author or body returns error changeset" do
+      attrs = %{author: String.duplicate("a", 256), body: String.duplicate("a", 751)}
+      assert {:error, %Ecto.Changeset{errors: errors}} = Posts.create_comment(attrs)
+
+      assert elem(errors[:author], 0) == "should be at most %{count} character(s)"
+      assert elem(errors[:body], 0) == "should be at most %{count} character(s)"
+    end
+
+    test "update_comment/2 with valid data updates the comment" do
+      comment = comment_fixture()
+      update_attrs = %{author: "some updated author", body: "some updated body", posted_at: ~U[2024-04-24 07:47:00Z]}
+
+      assert {:ok, %Comment{} = comment} = Posts.update_comment(comment, update_attrs)
+      assert comment.author == "some updated author"
+      assert comment.body == "some updated body"
+      assert comment.posted_at == ~U[2024-04-24 07:47:00Z]
+    end
+
+    test "update_comment/2 with invalid data returns error changeset" do
+      comment = comment_fixture()
+      assert {:error, %Ecto.Changeset{}} = Posts.update_comment(comment, @invalid_attrs)
+      assert comment == Posts.get_comment!(comment.id)
+    end
+
+    test "delete_comment/1 deletes the comment" do
+      comment = comment_fixture()
+      assert {:ok, %Comment{}} = Posts.delete_comment(comment)
+      assert_raise Ecto.NoResultsError, fn -> Posts.get_comment!(comment.id) end
+    end
+
+    test "change_comment/1 returns a comment changeset" do
+      comment = comment_fixture()
+      assert %Ecto.Changeset{} = Posts.change_comment(comment)
+    end
+
+    test "get_comments_by_post/1 returns comments for a given Post" do
+      post = post_fixture()
+      other_post = post_fixture()
+      comment = comment_fixture(%{post_id: post.id})
+      _other_comment = comment_fixture(%{post_id: other_post.id})
+
+      assert [db_comment] = Posts.get_comments_by_post(post)
+
+      assert db_comment.post_id == post.id
+      assert db_comment.id == comment.id
+    end
+
+    test "get_comments_by_post/1 returns comments for a given Post's id" do
+      post = post_fixture()
+      other_post = post_fixture()
+      comment = comment_fixture(%{post_id: post.id})
+      _other_comment = comment_fixture(%{post_id: other_post.id})
+
+      assert [db_comment] = Posts.get_comments_by_post(post.id)
+
+      assert db_comment.post_id == post.id
+      assert db_comment.id == comment.id
     end
   end
 end

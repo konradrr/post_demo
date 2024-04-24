@@ -4,7 +4,7 @@ defmodule PostDemo.Repo.Migrations.CreatePosts do
   def change do
     create table(:posts) do
       add :title, :string, null: false
-      add :body, :string, null: false
+      add :body, :text, null: false
 
       timestamps(type: :utc_datetime)
     end
