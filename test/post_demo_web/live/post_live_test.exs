@@ -39,15 +39,15 @@ defmodule PostDemoWeb.PostLiveTest do
       lv
       |> form("#comment_form")
       |> render_change(%{
-        "comment" => %{author: "Johhny", body: "abc"}
+        "comment" => %{author: "Johnny", body: "abc"}
       })
 
-      refute has_element?(lv, ~s(div[phx-feedback-for="shipping_info[zip_code]"] p), "can't be blank")
+      refute has_element?(lv, ~s(div[phx-feedback-for="comment[author]"] p), "can't be blank")
 
       html = lv |> form("#comment_form") |> render_submit()
 
       assert html =~ "Posted a comment!"
-      assert has_element?(lv, "div", "Johhny")
+      assert has_element?(lv, "div", "Johnny")
       assert has_element?(lv, "div", "abc")
     end
   end
